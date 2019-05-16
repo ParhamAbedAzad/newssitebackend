@@ -44,6 +44,19 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
 		{
+			
+			if (news == null || string.IsNullOrEmpty(news.Text)){
+				return BadRequest("news or  body can not be empty");
+			}
+			if(news.AdminId == null)
+			{
+				return BadRequest("adminID(authourID) can not be empty");
+			}
+			if (dbContext.Admins.Find(news.AdminId) == null)
+			{
+				return BadRequest("could not resolve admin");
+			}
+
 			news.DateAdded = DateTime.Now;
 			dbContext.News.Add(news);
 			dbContext.SaveChanges();
@@ -58,8 +71,9 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return NotFound("News not found");
 			}
+			
+			//dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.NewsId == newsId)); // remove comments of a news upon delete too
 			dbContext.News.Remove(news);
-			dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.NewsId == newsId)); // remove comments of a news upon delete too
 			dbContext.SaveChanges();
 			return Ok();
 
