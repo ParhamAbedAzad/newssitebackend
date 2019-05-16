@@ -12,11 +12,11 @@ namespace NewsSiteBackEnd.Models
 
         public int Id { get; set; }
         public string Username { get; set; }
-        public string Password { get; set; }
+        public byte[] Password { get; set; }
         public string Email { get; set; }
         public string Privilege { get; set; }
         public string PhotoUrl { get; set; }
-        public string Salt { get; set; }
+        public byte[] Salt { get; set; }
 
         public ICollection<News> News { get; set; }
     }

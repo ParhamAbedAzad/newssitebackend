@@ -13,6 +13,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using NewsSiteBackEnd.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using AutoMapper;
+
 namespace NewsSiteBackEnd
 {
     public class Startup
@@ -24,9 +29,27 @@ namespace NewsSiteBackEnd
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o =>
+			{
+
+				o.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = true,
+					ValidateAudience = true,
+					ValidateIssuerSigningKey = true,
+
+					ValidIssuer = "ourBeautifulNewsSite",
+					ValidAudience = "user",
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("lovelye_icecream_pincess_sweetie"))
+				};
+			});
+			
+			
+			
+			
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 			services.AddDbContext<NEWS_SITEContext>(options => options.UseSqlServer("Server=DESKTOP-S3C03RK\\AMIR;Database=NEWS_SITE;Trusted_Connection=True;"));
 
@@ -43,8 +66,9 @@ namespace NewsSiteBackEnd
             {
                 app.UseHsts();
             }
-			
-            app.UseHttpsRedirection();
+
+			app.UseAuthentication();
+			app.UseHttpsRedirection();
             app.UseMvc();
         }
 

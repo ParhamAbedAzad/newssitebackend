@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSiteBackEnd.Models;
 
@@ -15,6 +16,7 @@ namespace NewsSiteBackEnd.Controllers
 		{
 			this.dbContext = dbContext;
 		}
+
 		[HttpGet]
 		public IActionResult getAll()
 		{
@@ -38,6 +40,7 @@ namespace NewsSiteBackEnd.Controllers
 				return NotFound("News not found");
 			return Ok(news);
         }
+		[Authorize(Roles ="admin")]
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
 		{
@@ -46,6 +49,7 @@ namespace NewsSiteBackEnd.Controllers
 			dbContext.SaveChanges();
 			return Ok();
 		}
+		[Authorize(Roles = "admin")]
 		[HttpGet("del/{id}")]
 		public IActionResult delNews([FromRoute(Name ="id")]int newsId)
 		{

@@ -5,16 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSiteBackEnd.Models;
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
-
-using Microsoft.Extensions.Options;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace NewsSiteBackEnd.Controllers
 {
@@ -28,6 +23,7 @@ namespace NewsSiteBackEnd.Controllers
 		{
 			this.dbContext = dbContext;
 		}
+
 		[AllowAnonymous]
 		[HttpPost("authenticate")]
 		public IActionResult Authenticate([FromBody]UsersDto userDto)
@@ -39,28 +35,36 @@ namespace NewsSiteBackEnd.Controllers
 			var user = dbContext.Users.SingleOrDefault(x => x.Username == userDto.Username);
 			if(user == null)
 				return BadRequest(new { message = "Username or password is incorrect" });
-			if (!VerifyPasswordHash(userDto.Password, Encoding.UTF8.GetBytes(user.Password), Encoding.UTF8.GetBytes(user.Salt)))
+
+			System.Diagnostics.Debug.WriteLine("SHM:" +user.Password +"xxxxxx" + user.Salt +" ++++");
+			if (!VerifyPasswordHash(userDto.Password, user.Password, user.Salt))
 			{
 				return BadRequest(new { message = "Username or password is incorrect" });
 			}
+
+
 			var tokenHandler = new JwtSecurityTokenHandler();
-			var key = Encoding.ASCII.GetBytes("lovelye icecream pincess sweetie");
+			var key = Encoding.ASCII.GetBytes("lovelye_icecream_pincess_sweetie");
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
+				Issuer = "ourBeautifulNewsSite",
+				Audience = "user",
 				Subject = new ClaimsIdentity(new Claim[]
 				{
-					new Claim(ClaimTypes.Name, user.Id.ToString())
+					new Claim(ClaimTypes.Role, "user")
+				
 				}),
 				Expires = DateTime.UtcNow.AddHours(3),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 			};
+
 			var token = tokenHandler.CreateToken(tokenDescriptor);
 			var tokenString = tokenHandler.WriteToken(token);
 			UsersDtoNoPass userTokenHolder = new UsersDtoNoPass();
-			userTokenHolder.FirstName = user.FirstName;
-			userTokenHolder.LastName = user.LastName;
-			userTokenHolder.Id = user.Id;
-			userTokenHolder.Username = user.Username;
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<Users, UsersDtoNoPass>());
+			var mapper = config.CreateMapper();
+			mapper.Map(user, userTokenHolder);
+
 			userTokenHolder.token = tokenString;
 
 			return Ok(userTokenHolder);
@@ -73,84 +77,56 @@ namespace NewsSiteBackEnd.Controllers
 		{
 			if(dbContext.Users.Any(x => x.Username == userDto.Username))
 			{
-				return BadRequest("user already taken");
+				return BadRequest("username already taken");
+			}
+			if (dbContext.Users.Any(x => x.Email == userDto.Email))
+			{
+				return BadRequest("Email Address already taken");
+			}
+			if (dbContext.Users.Any(x => x.TelNumber == userDto.TelNumber))
+			{
+				return BadRequest("tell num already taken");
 			}
 
 			byte[] passwordHash, passwordSalt;
 			CreatePasswordHash(userDto.Password, out passwordHash, out passwordSalt);
-			Users user = new Users
-			{
-				Username = userDto.Username,
-				Password = Encoding.UTF8.GetString(passwordHash),
-				Salt = Encoding.UTF8.GetString(passwordSalt),
-				FirstName = userDto.FirstName,
-				LastName = userDto.LastName,
-				Email = userDto.Email,
-				TelNumber = userDto.TelNumber,
-				PhotoUrl = userDto.PhotoUrl,
-				Description = userDto.Description
-			};
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<UsersDto, Users>());
+			var mapper = config.CreateMapper();
+			Users user = new Users();
+			mapper.Map(userDto, user);
+			user.Password = passwordHash;
+			user.Salt = passwordSalt;
+
 			dbContext.Users.Add(user);
 			dbContext.SaveChanges();
-			return Ok();
+			return Ok("user: " + user.Username + " successfully created");
 
 		}
 
-			private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-		{
-			if (password == null) throw new ArgumentNullException("password");
-			if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-
-			using (var hmac = new System.Security.Cryptography.HMACSHA512())
-			{
-				passwordSalt = hmac.Key;
-				passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-			/*	using (var md5 = System.Security.Cryptography.MD5.Create())
-				{
-					passwordHash = md5.ComputeHash(passwordHash);
-				}*/
-			}
-		}
-		private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-		{
-			if (password == null) throw new ArgumentNullException("password");
-			if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-			if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
-			if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
-
-			using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-			{
-				var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-			/*	using (var md5 = System.Security.Cryptography.MD5.Create())
-				{
-					computedHash = md5.ComputeHash(computedHash);
-				}*/
-				
-				for (int i = 0; i < computedHash.Length; i++)
-				{
-					if (computedHash[i] != storedHash[i]) return false;
-				}
-			}
-
-			return true;
-		}
-		[HttpGet("id")]
+		[Authorize(Roles = "admin")]
+		[HttpGet("{id}")]
 		public IActionResult getUser([FromRoute(Name ="id")]int userId)
         {
 			var user = dbContext.Users.Find(userId);
 			if(user == null)
 			{
-				return NotFound("user not found");
+				return BadRequest("user not found");
 			}
-			return Ok(user);
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<Users, UsersDtoNoPass>());
+			var mapper = config.CreateMapper();
+			UsersDtoNoPass u = new UsersDtoNoPass();
+			mapper.Map(user, u);
+			return Ok(u);
         }
-
+		[Authorize(Roles = "admin")]
 		[HttpGet]
 		public IActionResult getAll()
 		{
 			var users = dbContext.Users;
 			return Ok(users);
 		}
+
+		[Authorize(Roles ="admin")]
 		[HttpDelete("{id}")]
 		public IActionResult DeleteUser(int id)
 		{
@@ -163,19 +139,13 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			return NotFound("user not found");
 		}
+		[Authorize(Roles = "admin")]
 		[HttpPut("{id}")]
 		public IActionResult UpdateUser(int id, [FromBody]UsersDto userDto) {
-			Users newUser = new Users
-			{
-				Id = id,
-				Username = userDto.Username,
-				FirstName = userDto.FirstName,
-				LastName = userDto.LastName,
-				Email = userDto.Email,
-				TelNumber = userDto.TelNumber,
-				PhotoUrl = userDto.PhotoUrl,
-				Description = userDto.Description
-			};
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<UsersDto, Users>());
+			var mapper = config.CreateMapper();
+			Users newUser = new Users();
+			mapper.Map(userDto, newUser);
 			var dbExistingUser = dbContext.Users.Find(id);
 			if(dbExistingUser == null)
 			{
@@ -207,13 +177,58 @@ namespace NewsSiteBackEnd.Controllers
 				byte[] passwordHash, passwordSalt;
 				CreatePasswordHash(userDto.Password, out passwordHash, out passwordSalt);
 
-				dbExistingUser.Password = Encoding.UTF8.GetString(passwordHash);
-				dbExistingUser.Salt = Encoding.UTF8.GetString(passwordSalt);
+				dbExistingUser.Password = passwordHash;
+				dbExistingUser.Salt = passwordSalt;
+				dbContext.Users.Update(dbExistingUser);
+				dbContext.SaveChanges();
+				return Ok();
 			}
-			dbContext.Users.Update(dbExistingUser);
-			dbContext.SaveChanges();
-			return Ok();
+			return BadRequest("empty pswd");
 		}
 
+		[HttpGet("comments/{userid}")]
+		public IActionResult getUserComments([FromRoute(Name ="userid")]int userid)
+		{
+			Users user = dbContext.Users.Find(userid);
+			if(user == null)
+			{
+				return BadRequest("user not found");
+			}
+			return Ok(user.Comments);
+		}
+		
+		private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+		{
+			if (password == null) throw new ArgumentNullException("password empty");
+			if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+
+			using (var hmac = new System.Security.Cryptography.HMACSHA512())
+			{
+				passwordSalt = hmac.Key;
+				passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+			}
+		}
+
+
+		private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+		{
+			if (password == null) throw new ArgumentNullException("password");
+			if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+			if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected is " + storedHash.Length + " " + ").", "passwordHash");
+			if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected is " + storedSalt.Length + " ).", "passwordHash");
+
+			using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
+			{
+				var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+				for (int i = 0; i < computedHash.Length; i++)
+				{
+					if (computedHash[i] != storedHash[i]) return false;
+				}
+
+			}
+
+			return true;
+		}
 	}
 }
