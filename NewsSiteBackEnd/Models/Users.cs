@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 namespace NewsSiteBackEnd.Models
 {
     public partial class Users
@@ -8,6 +9,7 @@ namespace NewsSiteBackEnd.Models
         {
             Comments = new HashSet<Comments>();
         }
+
         public int Id { get; set; }
         public string Username { get; set; }
         public byte[] Password { get; set; }

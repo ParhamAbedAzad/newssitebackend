@@ -13,7 +13,7 @@ using NewsSiteBackEnd.Models;
 namespace NewsSiteBackEnd.Controllers
 {
 	[Authorize(Roles = "admin,adminFullAccess")]
-	[ApiController]
+	//[ApiController]
 	[Route("Admins")]
 	public class AdminsController : Controller
     {
@@ -49,8 +49,8 @@ namespace NewsSiteBackEnd.Controllers
 				Audience = "user",
 				Subject = new ClaimsIdentity(new Claim[]
 				{
-					new Claim(ClaimTypes.Role, "admin")
-
+					new Claim(ClaimTypes.Role, "admin"),
+					new Claim("adminid",admin.Id.ToString())
 				}),
 				Expires = DateTime.UtcNow.AddHours(3),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -63,8 +63,8 @@ namespace NewsSiteBackEnd.Controllers
 					Audience = "user",
 					Subject = new ClaimsIdentity(new Claim[]
 				{
-					new Claim(ClaimTypes.Role, "adminFullAccess")
-
+					new Claim(ClaimTypes.Role, "adminFullAccess"),
+					new Claim("adminid",admin.Id.ToString())
 				}),
 					Expires = DateTime.UtcNow.AddHours(3),
 					SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -125,17 +125,8 @@ namespace NewsSiteBackEnd.Controllers
 			return Ok();
 		}
 
-		[AllowAnonymous]
-		[HttpGet("adminNews/{adminid}")]
-		public IActionResult getAdminNews([FromRoute(Name = "adminid")]int adminId)
-		{
-			Admins admin = dbContext.Admins.Find(adminId);
-			if(admin == null)
-			{
-				return BadRequest("admin not found");
-			}
-			return Ok(admin.News);
-		}
+		
+		
 
 
 		private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

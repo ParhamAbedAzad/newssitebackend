@@ -51,7 +51,8 @@ namespace NewsSiteBackEnd.Controllers
 				Audience = "user",
 				Subject = new ClaimsIdentity(new Claim[]
 				{
-					new Claim(ClaimTypes.Role, "user")
+					new Claim(ClaimTypes.Role, "user"),
+					new Claim("userid",user.Id.ToString())
 				
 				}),
 				Expires = DateTime.UtcNow.AddHours(3),
@@ -185,17 +186,7 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			return BadRequest("empty pswd");
 		}
-
-		[HttpGet("comments/{userid}")]
-		public IActionResult getUserComments([FromRoute(Name ="userid")]int userid)
-		{
-			Users user = dbContext.Users.Find(userid);
-			if(user == null)
-			{
-				return BadRequest("user not found");
-			}
-			return Ok(user.Comments);
-		}
+		
 		
 		private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
 		{

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NewsSiteBackEnd.Models;
 
 namespace NewsSiteBackEnd.Controllers
@@ -62,8 +64,9 @@ namespace NewsSiteBackEnd.Controllers
 			dbContext.SaveChanges();
 			return Ok();
 		}
+
 		[Authorize(Roles = "admin")]
-		[HttpGet("del/{id}")]
+		[HttpDelete("{id}")]
 		public IActionResult delNews([FromRoute(Name = "id")]int newsId)
 		{
 			var news = dbContext.News.Find(newsId);
@@ -71,23 +74,43 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return NotFound("News not found");
 			}
-			
-			//dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.NewsId == newsId)); // remove comments of a news upon delete too
+			dbContext.NewsPhoto.RemoveRange(dbContext.NewsPhoto.Where(n => n.NewsId == newsId)); //removes related pics
+			dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.NewsId == newsId)); // remove comments of a news upon delete too
+			dbContext.Tags.RemoveRange(dbContext.Tags.Where(t => t.NewsId == newsId));
 			dbContext.News.Remove(news);
 			dbContext.SaveChanges();
 			return Ok();
 
 		}
-		[HttpGet("newsComments/{newsid}")]
-		public IActionResult getNewsComments([FromRoute(Name ="newsid")]int newsid)
-		{
 
-			News news = dbContext.News.Find(newsid);
-			if (news == null)
+		[AllowAnonymous]
+		[HttpGet("adminNews/{adminid}")]
+		public IActionResult getAdminNews([FromRoute(Name = "adminid")]int adminId)
+		{
+			Admins admin = dbContext.Admins.Find(adminId);
+			if (admin == null)
 			{
-				return BadRequest("news not found");
+				return BadRequest("admin not found");
 			}
-			return Ok(news.Comments);
+			var news = dbContext.News.Where(n => n.AdminId == admin.Id);
+			var query = from n in news
+						select new { id = n.Id, title = n.Title, text = n.Text, adminid = n.AdminId, tags = n.Tags };
+			return Ok(query);
+		}
+
+		[HttpGet("adminNews/u/{adminuname}")]
+		public IActionResult getAdminNews([FromRoute(Name = "adminuname")]string adminUserName)
+		{
+			Admins admin = dbContext.Admins.Single(a => a.Username == adminUserName);
+			if (admin == null)
+			{
+				return BadRequest("admin not found");
+			}
+			
+			var news = dbContext.News.Where(n => n.AdminId == admin.Id);
+			var query = from n in news
+						select new { id=n.Id ,  title = n.Title, text = n.Text , adminid = n.AdminId , tags = n.Tags };
+			return Ok(query);
 		}
 
 	}

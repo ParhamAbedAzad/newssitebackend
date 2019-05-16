@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AutoMapper;
+using NewsSiteBackEnd.Models;
+using Newtonsoft.Json;
 
 namespace NewsSiteBackEnd
 {
@@ -26,8 +28,10 @@ namespace NewsSiteBackEnd
         {
             Configuration = configuration;
         }
+		private NEWS_SITEContext dbContext;
+		
 
-        public IConfiguration Configuration { get; }
+		public IConfiguration Configuration { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
@@ -40,19 +44,25 @@ namespace NewsSiteBackEnd
 					ValidateIssuer = true,
 					ValidateAudience = true,
 					ValidateIssuerSigningKey = true,
-
 					ValidIssuer = "ourBeautifulNewsSite",
 					ValidAudience = "user",
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("lovelye_icecream_pincess_sweetie"))
 				};
 			});
-			
-			
-			
-			
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-			services.AddDbContext<NEWS_SITEContext>(options => options.UseSqlServer("Server=DESKTOP-S3C03RK\\AMIR;Database=NEWS_SITE;Trusted_Connection=True;"));
 
+			/*services.AddAuthorization(options =>
+			{
+				options.AddPolicy("Admins", policy =>
+								  policy.RequireClaim("adminid",dbContext.Admins.All);
+			});
+			*/
+
+			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			services.AddDbContext<NEWS_SITEContext>(options => options.UseSqlServer("Server=DESKTOP-S3C03RK\\AMIR;Database=NEWS_SITE;Trusted_Connection=True;"));
+			/*services.AddMvc().AddJsonOptions(options => {
+				//options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+				options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+			});*/
 		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,6 +80,7 @@ namespace NewsSiteBackEnd
 			app.UseAuthentication();
 			app.UseHttpsRedirection();
             app.UseMvc();
+
         }
 
 

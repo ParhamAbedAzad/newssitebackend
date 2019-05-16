@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSiteBackEnd.Models;
 namespace NewsSiteBackEnd.Controllers
 {
 	[Authorize]
-	[Route("Comment")]
+	[Route("Comments")]
     public class CommentsController : Controller
     {
 		private NEWS_SITEContext dbContext;
@@ -72,5 +73,34 @@ namespace NewsSiteBackEnd.Controllers
 			return Ok();
 		}
 
-    }
+		[AllowAnonymous]
+		[HttpGet("newsComments/{newsid}")]
+		public IActionResult getAllComments([FromRoute(Name ="newsid")]int newsid)
+		{
+			if (dbContext.News.Find(newsid) != null)
+			{
+				
+				var comments = dbContext.Comments.Where(c => c.NewsId == newsid);
+				var query = from c in comments
+							select new { c.Id, c.Body, c.Date, c.UserId };
+				return Ok(query);
+			}
+			return BadRequest("no news with such id");
+		}
+		[AllowAnonymous]
+		[HttpGet("userComments/{userid}")]
+		public IActionResult getUserComments([FromRoute(Name = "userid")]int userid)
+		{
+			Users user = dbContext.Users.Find(userid);
+			if (user == null)
+			{
+				return BadRequest("user not found");
+			}
+			var comments = dbContext.Comments.Where(c => c.UserId == userid);
+			var query = from c in comments
+						select new { c.Id, c.Body, c.Date, c.UserId };
+			return Ok(query);
+		}
+
+	}
 }
