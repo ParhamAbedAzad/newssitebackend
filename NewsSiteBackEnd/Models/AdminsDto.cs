@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace NewsSiteBackEnd.Models
 {
-	public class UsersDtoNoPass
+	public class AdminsDto
 	{
 		public int Id { get; set; }
 		public string Username { get; set; }
-		public string FirstName { get; set; }
-		public string LastName { get; set; }
-		public string TelNumber { get; set; }
+		public string Password { get; set; }
 		public string Email { get; set; }
+		public string Privilege { get; set; }
+		public string PhotoUrl { get; set; }
 		public string Token { get; set; }
 	}
 }

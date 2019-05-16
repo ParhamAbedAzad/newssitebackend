@@ -12,9 +12,9 @@ using Microsoft.IdentityModel.Tokens;
 using NewsSiteBackEnd.Models;
 namespace NewsSiteBackEnd.Controllers
 {
-	[Authorize]
+	[Authorize(Roles = "admin,adminFullAccess")]
 	[ApiController]
-	[Route("Users")]
+	[Route("Admins")]
 	public class AdminsController : Controller
     {
 		private NEWS_SITEContext dbContext;
@@ -24,18 +24,18 @@ namespace NewsSiteBackEnd.Controllers
 		}
 		[AllowAnonymous]
 		[HttpPost("authenticate")]
-		public IActionResult Authenticate([FromBody]UsersDto userDto)
+		public IActionResult Authenticate([FromBody]AdminsDto adminDto)
 		{
-			if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
+			if (string.IsNullOrEmpty(adminDto.Username) || string.IsNullOrEmpty(adminDto.Password))
 			{
 				return BadRequest("username or pass is null or empty");
 			}
-			var user = dbContext.Users.SingleOrDefault(x => x.Username == userDto.Username);
-			if (user == null)
+			var admin = dbContext.Admins.SingleOrDefault(x => x.Username == adminDto.Username);
+			if (admin == null)
 				return BadRequest(new { message = "Username or password is incorrect" });
 
-			System.Diagnostics.Debug.WriteLine("SHM:" + user.Password + "xxxxxx" + user.Salt + " ++++");
-			if (!VerifyPasswordHash(userDto.Password, user.Password, user.Salt))
+			System.Diagnostics.Debug.WriteLine("SHM:" + admin.Password + "xxxxxx" + admin.Salt + " ++++");
+			if (!VerifyPasswordHash(adminDto.Password, admin.Password, admin.Salt))
 			{
 				return BadRequest(new { message = "Username or password is incorrect" });
 			}
@@ -49,25 +49,95 @@ namespace NewsSiteBackEnd.Controllers
 				Audience = "user",
 				Subject = new ClaimsIdentity(new Claim[]
 				{
-					new Claim(ClaimTypes.Role, "user")
+					new Claim(ClaimTypes.Role, "admin")
 
 				}),
 				Expires = DateTime.UtcNow.AddHours(3),
 				SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 			};
+			if(admin.Privilege == "fullAccess")
+			{
+				tokenDescriptor = new SecurityTokenDescriptor
+				{
+					Issuer = "ourBeautifulNewsSite",
+					Audience = "user",
+					Subject = new ClaimsIdentity(new Claim[]
+				{
+					new Claim(ClaimTypes.Role, "adminFullAccess")
+
+				}),
+					Expires = DateTime.UtcNow.AddHours(3),
+					SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+				};
+			}
 
 			var token = tokenHandler.CreateToken(tokenDescriptor);
 			var tokenString = tokenHandler.WriteToken(token);
-			UsersDtoNoPass userTokenHolder = new UsersDtoNoPass();
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<Users, UsersDtoNoPass>());
+			AdminsDto adminTokenHolder = new AdminsDto();
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<Admins, AdminsDto>());
 			var mapper = config.CreateMapper();
-			mapper.Map(user, userTokenHolder);
+			mapper.Map(admin, adminTokenHolder);
+			adminTokenHolder.Password = null;
+			
+			adminTokenHolder.Token = tokenString;
 
-			userTokenHolder.token = tokenString;
-
-			return Ok(userTokenHolder);
+			return Ok(adminTokenHolder);
 
 		}
+		[Authorize(Roles = "adminFullAccess")]
+		[HttpPost("regAdmin")]
+		public IActionResult Register([FromBody]AdminsDto adminDto)
+		{
+			if (dbContext.Admins.Any(x => x.Username == adminDto.Username))
+			{
+				return BadRequest("username already taken");
+			}
+
+			byte[] passwordHash, passwordSalt;
+			CreatePasswordHash(adminDto.Password, out passwordHash, out passwordSalt);
+			var config = new MapperConfiguration(cfg => cfg.CreateMap<AdminsDto, Admins>());
+			var mapper = config.CreateMapper();
+			Admins admin = new Admins();
+			mapper.Map(adminDto, admin);
+			admin.Password = passwordHash;
+			admin.Salt = passwordSalt;
+
+			dbContext.Admins.Add(admin);
+			dbContext.SaveChanges();
+			return Ok("admin: " + admin.Username + " successfully created");
+
+		}
+		[Authorize(Roles = "adminFullAccess")]
+		[HttpDelete("{id}")]
+		public IActionResult deleteAdmin([FromRoute(Name ="id")]int id)
+		{
+			Admins admin = dbContext.Admins.Find(id);
+			if(admin == null)
+			{
+				return BadRequest("admin not found");
+			}
+			if(admin.Privilege == "fullAccess")
+			{
+				return BadRequest("can not delete a full Access admin");
+			}
+			dbContext.Admins.Remove(admin);
+			dbContext.SaveChanges();
+			return Ok();
+		}
+
+		[AllowAnonymous]
+		[HttpGet("adminNews/{adminid}")]
+		public IActionResult getAdminNews([FromRoute(Name = "adminid")]int adminId)
+		{
+			Admins admin = dbContext.Admins.Find(adminId);
+			if(admin == null)
+			{
+				return BadRequest("admin not found");
+			}
+			return Ok(admin.News);
+		}
+
+
 		private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
 		{
 			if (password == null) throw new ArgumentNullException("password");

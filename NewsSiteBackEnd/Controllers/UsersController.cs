@@ -65,7 +65,7 @@ namespace NewsSiteBackEnd.Controllers
 			var mapper = config.CreateMapper();
 			mapper.Map(user, userTokenHolder);
 
-			userTokenHolder.token = tokenString;
+			userTokenHolder.Token = tokenString;
 
 			return Ok(userTokenHolder);
 

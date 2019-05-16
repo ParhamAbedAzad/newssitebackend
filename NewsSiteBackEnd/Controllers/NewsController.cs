@@ -51,10 +51,10 @@ namespace NewsSiteBackEnd.Controllers
 		}
 		[Authorize(Roles = "admin")]
 		[HttpGet("del/{id}")]
-		public IActionResult delNews([FromRoute(Name ="id")]int newsId)
+		public IActionResult delNews([FromRoute(Name = "id")]int newsId)
 		{
 			var news = dbContext.News.Find(newsId);
-			if ( news == null)
+			if (news == null)
 			{
 				return NotFound("News not found");
 			}
@@ -63,6 +63,17 @@ namespace NewsSiteBackEnd.Controllers
 			dbContext.SaveChanges();
 			return Ok();
 
+		}
+		[HttpGet("newsComments/{newsid}")]
+		public IActionResult getNewsComments([FromRoute(Name ="newsid")]int newsid)
+		{
+
+			News news = dbContext.News.Find(newsid);
+			if (news == null)
+			{
+				return BadRequest("news not found");
+			}
+			return Ok(news.Comments);
 		}
 
 	}

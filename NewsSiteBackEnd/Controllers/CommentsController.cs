@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSiteBackEnd.Models;
 namespace NewsSiteBackEnd.Controllers
 {
+	[Authorize]
 	[Route("Comment")]
     public class CommentsController : Controller
     {
@@ -21,11 +23,20 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("comment has no text");
 			}
+			if (comment.UserId == null || comment.NewsId == null)
+			{
+				return BadRequest("userID or newsID is empty");
+			}
+			if(dbContext.Users.Find(comment.UserId) == null || dbContext.News.Find(comment.NewsId) == null)
+			{
+				return BadRequest("user or news does not exist");
+			}
 			comment.Date = DateTime.Now;
 			dbContext.Comments.Add(comment);
 			dbContext.SaveChanges();
 			return Ok();
 		}
+
 		[HttpDelete("{commentId}")]		
 		public IActionResult delComment([FromRoute(Name = "commentID")]int commentId) {
 
