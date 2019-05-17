@@ -134,6 +134,7 @@ namespace NewsSiteBackEnd.Controllers
 			var user = dbContext.Users.Find(id);
 			if(user != null)
 			{
+				dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.UserId == user.Id));
 				dbContext.Users.Remove(user);
 				dbContext.SaveChanges();
 				return Ok();

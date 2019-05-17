@@ -23,6 +23,17 @@ namespace NewsSiteBackEnd.Controllers
 			this.dbContext = dbContext;
 		}
 		[AllowAnonymous]
+		[HttpGet("adminbyid/{id}")]
+		public IActionResult getAdminNameEmail([FromRoute(Name = "id")]int id)
+		{
+			Admins admin = dbContext.Admins.Find(id);
+			if (admin == null)
+			{
+				return BadRequest("admin not found");
+			}
+			return Ok(new { admin.Id, admin.Username, admin.Email });
+		}
+		[AllowAnonymous]
 		[HttpPost("authenticate")]
 		public IActionResult Authenticate([FromBody]AdminsDto adminDto)
 		{
@@ -120,13 +131,32 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("can not delete a full Access admin");
 			}
+
+			foreach (News n in dbContext.News.Where(n => n.AdminId == id))
+			{
+				delRelatedNewsToadmin(n);
+			}
 			dbContext.Admins.Remove(admin);
 			dbContext.SaveChanges();
 			return Ok();
 		}
+		public bool delRelatedNewsToadmin(News n)
+		{
+			var news = dbContext.News.Find(n.Id);
+			if (news == null)
+			{
+				return false;
+			}
+			dbContext.NewsPhoto.RemoveRange(dbContext.NewsPhoto.Where(ne => ne.NewsId == n.Id)); //removes related pics
+			dbContext.Comments.RemoveRange(dbContext.Comments.Where(c => c.NewsId == n.Id)); // remove comments of a news upon delete too
+			dbContext.Tags.RemoveRange(dbContext.Tags.Where(t => t.NewsId == n.Id));
+			dbContext.News.Remove(news);
+			dbContext.SaveChanges();
+			return true;
 
-		
-		
+		}
+
+
 
 
 		private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

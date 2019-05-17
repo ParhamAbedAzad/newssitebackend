@@ -22,7 +22,9 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet]
 		public IActionResult getAll()
 		{
-			return Ok(dbContext.News);
+				var query = from n in dbContext.News
+							select new {n.Id , n.Title , n.Text ,n.DateAdded, n.AdminId };
+			return Ok(query);
 		}
 		[HttpGet("{start}/{end}")]
 		public IActionResult getRange([FromRoute(Name = "start")]int start, [FromRoute(Name = "end")]int end )
