@@ -61,10 +61,7 @@ namespace NewsSiteBackEnd.Controllers
 
 			var token = tokenHandler.CreateToken(tokenDescriptor);
 			var tokenString = tokenHandler.WriteToken(token);
-			UsersDtoNoPass userTokenHolder = new UsersDtoNoPass();
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<Users, UsersDtoNoPass>());
-			var mapper = config.CreateMapper();
-			mapper.Map(user, userTokenHolder);
+			UsersDtoNoPass userTokenHolder = new UsersDtoNoPass(user);
 
 			userTokenHolder.Token = tokenString;
 
@@ -108,15 +105,18 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet("{id}")]
 		public IActionResult getUser([FromRoute(Name ="id")]int userId)
         {
+			if(Int32.Parse(this.User.FindFirst("userid").Value) == userId)
+			{
+				return Unauthorized();
+			}
 			var user = dbContext.Users.Find(userId);
 			if(user == null)
 			{
 				return BadRequest("user not found");
 			}
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<Users, UsersDtoNoPass>());
-			var mapper = config.CreateMapper();
-			UsersDtoNoPass u = new UsersDtoNoPass();
-			mapper.Map(user, u);
+
+			UsersDtoNoPass u = new UsersDtoNoPass(user);
+
 			return Ok(u);
         }
 		[Authorize(Roles = "admin")]
@@ -141,7 +141,7 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			return NotFound("user not found");
 		}
-		[Authorize(Roles = "admin")]
+		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPut("{id}")]
 		public IActionResult UpdateUser(int id, [FromBody]UsersDto userDto) {
 			var config = new MapperConfiguration(cfg => cfg.CreateMap<UsersDto, Users>());

@@ -52,11 +52,9 @@ namespace NewsSiteBackEnd.Controllers
 			if (news == null || string.IsNullOrEmpty(news.Text)){
 				return BadRequest("news or  body can not be empty");
 			}
-			if(news.AdminId == null)
-			{
-				return BadRequest("adminID(authourID) can not be empty");
-			}
-			if (dbContext.Admins.Find(news.AdminId) == null)
+			int adminid = Int32.Parse(this.User.FindFirst("adminid").Value);
+			news.AdminId = adminid;
+			if (dbContext.Admins.Find(adminid) == null)
 			{
 				return BadRequest("could not resolve admin");
 			}

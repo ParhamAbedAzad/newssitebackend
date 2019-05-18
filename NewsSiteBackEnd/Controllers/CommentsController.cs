@@ -17,17 +17,18 @@ namespace NewsSiteBackEnd.Controllers
 		{
 			this.dbContext = dbContext;
 		}
+		[Authorize(Roles = "user")]
 		[HttpPost]
 		public IActionResult addComment([FromBody]Comments comment)
 		{
+			int userId = Int32.Parse(this.User.FindFirst("userid").Value);
 			if(string.IsNullOrEmpty(comment.Body))
 			{
 				return BadRequest("comment has no text");
 			}
-			if (comment.UserId == null || comment.NewsId == null)
-			{
-				return BadRequest("userID or newsID is empty");
-			}
+
+			comment.UserId = userId;
+
 			if(dbContext.Users.Find(comment.UserId) == null || dbContext.News.Find(comment.NewsId) == null)
 			{
 				return BadRequest("user or news does not exist");
@@ -82,7 +83,7 @@ namespace NewsSiteBackEnd.Controllers
 				
 				var comments = dbContext.Comments.Where(c => c.NewsId == newsid);
 				var query = from c in comments
-							select new { c.Id, c.Body, c.Date, c.UserId };
+							select new CommentsDto(c);
 				return Ok(query);
 			}
 			return BadRequest("no news with such id");
@@ -98,7 +99,7 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			var comments = dbContext.Comments.Where(c => c.UserId == userid);
 			var query = from c in comments
-						select new { c.Id, c.Body, c.Date, c.UserId };
+						select new CommentsDto(c);//{ c.Id, c.Body, c.Date, c.UserId };
 			return Ok(query);
 		}
 

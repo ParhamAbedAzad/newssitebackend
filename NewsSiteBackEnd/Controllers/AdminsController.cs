@@ -31,6 +31,17 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("admin not found");
 			}
+			return Ok(new { admin.Id, admin.Username/*, admin.Email */});
+		}
+		[Authorize(Roles = "adminFullAccess")]
+		[HttpGet("adminbyid/{id}")]
+		public IActionResult getAdmin()
+		{
+			Admins admin = dbContext.Admins.Find(Int32.Parse(this.User.FindFirst("userid").Value));
+			if (admin == null)
+			{
+				return BadRequest("admin not found");
+			}
 			return Ok(new { admin.Id, admin.Username, admin.Email });
 		}
 		[AllowAnonymous]
