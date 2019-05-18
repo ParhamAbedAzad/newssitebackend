@@ -76,7 +76,7 @@ namespace NewsSiteBackEnd
             {
                 app.UseHsts();
             }
-
+			app.UseCors(option => option.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
 			app.UseAuthentication();
 			app.UseHttpsRedirection();
             app.UseMvc();
