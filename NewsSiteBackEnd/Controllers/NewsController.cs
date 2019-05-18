@@ -22,8 +22,8 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet]
 		public IActionResult getAll()
 		{
-				var query = from n in dbContext.News
-							select new {n.Id , n.Title , n.Text ,n.DateAdded, n.AdminId };
+				var query = from n in dbContext.News.OrderByDescending(n => n.DateAdded)
+							select new NewsDto(n);
 			return Ok(query);
 		}
 		[HttpGet("{start}/{end}")]
@@ -33,7 +33,8 @@ namespace NewsSiteBackEnd.Controllers
 			var res = dbContext.News.OrderByDescending(n => n.DateAdded).Skip(start).Take(end);
 			if (!res.Any())
 				return BadRequest();
-			return Ok(res);
+			var query = from n in res select new NewsDto(n);
+			return Ok(query);
 		}
 		[HttpGet("{id}")]
         public IActionResult getNews([FromRoute(Name = "id")]int newsId)
@@ -42,9 +43,9 @@ namespace NewsSiteBackEnd.Controllers
 			
 			if (news == null)
 				return NotFound("News not found");
-			return Ok(news);
+			return Ok(new NewsDto(news));
         }
-		[Authorize(Roles ="admin")]
+		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
 		{
