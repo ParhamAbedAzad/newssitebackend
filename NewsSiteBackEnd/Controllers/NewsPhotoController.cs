@@ -27,7 +27,7 @@ namespace NewsSiteBackEnd.Controllers
 			return Ok(pths);
 
 		}
-		[HttpGet("nid/{newsid}")]
+		[HttpGet("n/{newsid}")]
 		public IActionResult getByNewsId([FromRoute(Name ="newsid")]int newsid)
 		{
 			if (dbContext.News.Find(newsid) == null)
@@ -36,7 +36,7 @@ namespace NewsSiteBackEnd.Controllers
 			
 			var query = from p in pths
 						select new {p.Id , p.PhotoUrl , p.NewsId };
-			return Ok(pths);
+			return Ok(query);
 		}
 		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPost]
