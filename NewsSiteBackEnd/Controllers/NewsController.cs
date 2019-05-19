@@ -66,7 +66,7 @@ namespace NewsSiteBackEnd.Controllers
 			return Ok();
 		}
 
-		[Authorize(Roles = "admin")]
+		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpDelete("{id}")]
 		public IActionResult delNews([FromRoute(Name = "id")]int newsId)
 		{
