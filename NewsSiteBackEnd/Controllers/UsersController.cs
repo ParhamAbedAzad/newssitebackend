@@ -10,6 +10,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using AutoMapper;
+using System.Net.Http.Headers;
+using System.IO;
 
 namespace NewsSiteBackEnd.Controllers
 {
@@ -22,6 +24,12 @@ namespace NewsSiteBackEnd.Controllers
 		public UsersController(NEWS_SITEContext dbContext)
 		{
 			this.dbContext = dbContext;
+		}
+		[AllowAnonymous]
+		[HttpGet("radio")]
+		public IActionResult playRadio()
+		{
+			return File(System.IO.File.OpenRead("teddy.mp3"), "audio/mp3");
 		}
 
 		[AllowAnonymous]

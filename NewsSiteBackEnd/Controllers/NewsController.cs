@@ -49,7 +49,6 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
 		{
-			
 			if (news == null || string.IsNullOrEmpty(news.Text)){
 				return BadRequest("news or  body can not be empty");
 			}
