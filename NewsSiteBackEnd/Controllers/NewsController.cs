@@ -50,7 +50,7 @@ namespace NewsSiteBackEnd.Controllers
 		public IActionResult totalPages()
 		{
 			var count = dbContext.News.Count();
-			
+			count = (count / 6) +1 ;
 			return Ok(count);
 		}
 		[HttpGet("{id}")]
