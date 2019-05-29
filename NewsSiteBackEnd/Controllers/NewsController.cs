@@ -36,6 +36,23 @@ namespace NewsSiteBackEnd.Controllers
 			var query = from n in res select new NewsDto(n);
 			return Ok(query);
 		}
+		[HttpGet("page/{num}")]
+		public IActionResult getByPage([FromRoute(Name = "num")]int num)
+		{
+			num--;
+			var res = dbContext.News.OrderByDescending(n => n.DateAdded).Skip(num*6).Take(6);
+			if (!res.Any())
+				return BadRequest();
+			var query = from n in res select new NewsDto(n);
+			return Ok(query);
+		}
+		[HttpGet("page")]
+		public IActionResult totalPages()
+		{
+			var count = dbContext.News.Count();
+			
+			return Ok(count);
+		}
 		[HttpGet("{id}")]
         public IActionResult getNews([FromRoute(Name = "id")]int newsId)
         {

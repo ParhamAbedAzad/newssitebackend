@@ -25,12 +25,6 @@ namespace NewsSiteBackEnd.Controllers
 		{
 			this.dbContext = dbContext;
 		}
-		[AllowAnonymous]
-		[HttpGet("radio")]
-		public IActionResult playRadio()
-		{
-			return File(System.IO.File.OpenRead("teddy.mp3"), "audio/mp3");
-		}
 
 		[AllowAnonymous]
 		[HttpPost("authenticate")]
