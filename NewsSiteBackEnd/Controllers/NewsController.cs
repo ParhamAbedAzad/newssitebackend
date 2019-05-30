@@ -56,12 +56,16 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet("{id}")]
         public IActionResult getNews([FromRoute(Name = "id")]int newsId)
         {
-			var news = dbContext.News.Find(newsId);
+			var news = dbContext.News.Where(n => n.Id == newsId);
 			
 			if (news == null)
 				return NotFound("News not found");
-			return Ok(new NewsDto(news));
-        }
+
+			var query = from n in news
+						select new { id = n.Id, title = n.Title, text = n.Text,
+							adminid = n.AdminId, tags = n.Tags , comments = n.Comments};
+			return Ok(query);
+		}
 		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
