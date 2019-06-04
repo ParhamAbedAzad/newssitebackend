@@ -18,7 +18,26 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet]
 		public IActionResult playRadio()
 		{
-			return File(System.IO.File.OpenRead("teddy.mp3"), "audio/mp3");
+			string url = dbContext.RadioUrl.FirstOrDefault(id => id.Id == 1).Url;
+			if (url == null)
+			{
+				return BadRequest();
+			}
+			string path = "./Resources/" + url + ".mp3";
+			if (!System.IO.File.Exists(path) )
+			{
+				return BadRequest();
+			}
+			return File(System.IO.File.OpenRead(path), "audio/mp3");
+			
 		}
+		/*
+		[HttpPost]
+		public IActionResult addFile()
+		{
+
+
+			return Ok();
+		}*/
 	}
 }

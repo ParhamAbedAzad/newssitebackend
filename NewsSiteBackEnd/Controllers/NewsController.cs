@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,8 +13,8 @@ using NewsSiteBackEnd.Models;
 namespace NewsSiteBackEnd.Controllers
 {
 	[Route("News")]
-    public class NewsController : Controller
-    {
+	public class NewsController : Controller
+	{
 		private NEWS_SITEContext dbContext;
 		public NewsController(NEWS_SITEContext dbContext)
 		{
@@ -22,12 +24,12 @@ namespace NewsSiteBackEnd.Controllers
 		[HttpGet]
 		public IActionResult getAll()
 		{
-				var query = from n in dbContext.News.OrderByDescending(n => n.DateAdded)
-							select new NewsDto(n);
+			var query = from n in dbContext.News.OrderByDescending(n => n.DateAdded)
+						select new NewsDto(n);
 			return Ok(query);
 		}
 		[HttpGet("{start}/{end}")]
-		public IActionResult getRange([FromRoute(Name = "start")]int start, [FromRoute(Name = "end")]int end )
+		public IActionResult getRange([FromRoute(Name = "start")]int start, [FromRoute(Name = "end")]int end)
 		{
 			start--;
 			var res = dbContext.News.OrderByDescending(n => n.DateAdded).Skip(start).Take(end);
@@ -40,7 +42,7 @@ namespace NewsSiteBackEnd.Controllers
 		public IActionResult getByPage([FromRoute(Name = "num")]int num)
 		{
 			num--;
-			var res = dbContext.News.OrderByDescending(n => n.DateAdded).Skip(num*6).Take(6);
+			var res = dbContext.News.OrderByDescending(n => n.DateAdded).Skip(num * 6).Take(6);
 			if (!res.Any())
 				return BadRequest();
 			var query = from n in res select new NewsDto(n);
@@ -50,27 +52,43 @@ namespace NewsSiteBackEnd.Controllers
 		public IActionResult totalPages()
 		{
 			var count = dbContext.News.Count();
-			count = (count / 6) +1 ;
+			count = (count / 6) + 1;
 			return Ok(count);
 		}
 		[HttpGet("{id}")]
-        public IActionResult getNews([FromRoute(Name = "id")]int newsId)
-        {
+		public IActionResult getNews([FromRoute(Name = "id")]int newsId)
+		{
 			var news = dbContext.News.Where(n => n.Id == newsId);
-			
+
 			if (news == null)
 				return NotFound("News not found");
 
 			var query = from n in news
-						select new { id = n.Id, title = n.Title, text = n.Text,
-							adminid = n.AdminId, tags = n.Tags , comments = n.Comments};
-			return Ok(query);
+						select new
+						{
+							id = n.Id,
+							title = n.Title,
+							text = n.Text,
+							adminid = n.AdminId,
+							tags = from t in n.Tags select new { id = t.Id , newsid = t.NewsId , tag =	t.Tag},
+							comments = from c in n.Comments
+									   select new
+									   {
+										   id = c.Id,
+										   body = c.Body,
+										   date = c.Date,
+										   userid = c.UserId,
+										   username = c.User.Username
+									   }
+						};
+			return Ok(query.First());
 		}
 		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPost]
 		public IActionResult addNews([FromBody]News news)
 		{
-			if (news == null || string.IsNullOrEmpty(news.Text)){
+			if (news == null || string.IsNullOrEmpty(news.Text))
+			{
 				return BadRequest("news or  body can not be empty");
 			}
 			int adminid = Int32.Parse(this.User.FindFirst("adminid").Value);
@@ -127,10 +145,10 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("admin not found");
 			}
-			
+
 			var news = dbContext.News.Where(n => n.AdminId == admin.Id);
 			var query = from n in news
-						select new { id=n.Id ,  title = n.Title, text = n.Text , adminid = n.AdminId , tags = n.Tags };
+						select new { id = n.Id, title = n.Title, text = n.Text, adminid = n.AdminId, tags = n.Tags };
 			return Ok(query);
 		}
 
