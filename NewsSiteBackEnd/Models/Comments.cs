@@ -10,6 +10,7 @@ namespace NewsSiteBackEnd.Models
         public DateTime? Date { get; set; }
         public int? UserId { get; set; }
         public int? NewsId { get; set; }
+
         public News News { get; set; }
         public Users User { get; set; }
     }

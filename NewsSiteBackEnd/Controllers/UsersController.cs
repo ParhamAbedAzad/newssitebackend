@@ -10,6 +10,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using AutoMapper;
+using System.Net.Http.Headers;
+using System.IO;
 
 namespace NewsSiteBackEnd.Controllers
 {
@@ -36,7 +38,7 @@ namespace NewsSiteBackEnd.Controllers
 			if(user == null)
 				return BadRequest(new { message = "Username or password is incorrect" });
 
-			System.Diagnostics.Debug.WriteLine("SHM:" +user.Password +"xxxxxx" + user.Salt +" ++++");
+			//System.Diagnostics.Debug.WriteLine("SHM:" +user.Password +"xxxxxx" + user.Salt +" ++++");
 			if (!VerifyPasswordHash(userDto.Password, user.Password, user.Salt))
 			{
 				return BadRequest(new { message = "Username or password is incorrect" });
@@ -83,7 +85,7 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			if (dbContext.Users.Any(x => x.TelNumber == userDto.TelNumber))
 			{
-				return BadRequest("tell num already taken");
+				return BadRequest("tell number already taken");
 			}
 
 			byte[] passwordHash, passwordSalt;

@@ -19,6 +19,7 @@ namespace NewsSiteBackEnd.Models
         public virtual DbSet<Comments> Comments { get; set; }
         public virtual DbSet<News> News { get; set; }
         public virtual DbSet<NewsPhoto> NewsPhoto { get; set; }
+        public virtual DbSet<RadioUrl> RadioUrl { get; set; }
         public virtual DbSet<Tags> Tags { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
@@ -44,8 +45,7 @@ namespace NewsSiteBackEnd.Models
 
                 entity.Property(e => e.Password)
                     .HasColumnName("password")
-                    .HasMaxLength(600)
-                    .IsUnicode(false);
+                    .HasMaxLength(64);
 
                 entity.Property(e => e.PhotoUrl)
                     .HasColumnName("photoURL")
@@ -57,8 +57,7 @@ namespace NewsSiteBackEnd.Models
 
                 entity.Property(e => e.Salt)
                     .HasColumnName("salt")
-                    .HasMaxLength(600)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
                 entity.Property(e => e.Username)
                     .HasColumnName("username")
@@ -134,6 +133,19 @@ namespace NewsSiteBackEnd.Models
                     .HasConstraintName("FK_NewsPhoto_News");
             });
 
+            modelBuilder.Entity<RadioUrl>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Url)
+                    .HasColumnName("url")
+                    .HasMaxLength(400);
+            });
+
             modelBuilder.Entity<Tags>(entity =>
             {
                 entity.Property(e => e.Id).HasColumnName("id");
@@ -177,8 +189,7 @@ namespace NewsSiteBackEnd.Models
 
                 entity.Property(e => e.Password)
                     .HasColumnName("password")
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
+                    .HasMaxLength(64);
 
                 entity.Property(e => e.PhotoUrl)
                     .HasColumnName("photoURL")
@@ -187,8 +198,7 @@ namespace NewsSiteBackEnd.Models
 
                 entity.Property(e => e.Salt)
                     .HasColumnName("salt")
-                    .HasMaxLength(600)
-                    .IsUnicode(false);
+                    .HasMaxLength(128);
 
                 entity.Property(e => e.TelNumber)
                     .HasColumnName("telNumber")
