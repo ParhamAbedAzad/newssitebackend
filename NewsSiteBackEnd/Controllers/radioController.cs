@@ -31,6 +31,13 @@ namespace NewsSiteBackEnd.Controllers
 			return File(System.IO.File.OpenRead(path), "audio/mp3");
 			
 		}
+		[HttpGet("tracks")]
+		public IActionResult getTracks()
+		{
+			var query = (from rad in dbContext.RadioUrl orderby rad.Id descending select new { url = rad.Url }).Take(6);
+			return Ok(query);
+
+		}
 		/*
 		[HttpPost]
 		public IActionResult addFile()

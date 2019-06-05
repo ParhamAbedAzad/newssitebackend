@@ -15,7 +15,6 @@ namespace NewsSiteBackEnd.Models
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 		public string TelNumber { get; set; }
-
 		[EmailAddress(ErrorMessage = "not a valid email address")]
 		public string Email { get; set; }
 		public string Description { get; set; }
