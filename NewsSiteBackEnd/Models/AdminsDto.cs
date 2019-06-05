@@ -7,6 +7,10 @@ namespace NewsSiteBackEnd.Models
 {
 	public class AdminsDto
 	{
+		public AdminsDto()
+		{
+
+		}
 		public AdminsDto(Admins a)
 		{
 			Id = a.Id;

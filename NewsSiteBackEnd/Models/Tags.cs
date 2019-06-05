@@ -5,11 +5,14 @@ namespace NewsSiteBackEnd.Models
 {
     public partial class Tags
     {
-		public Tags(TagsDto t)
+		public Tags() {
+
+		}
+		public Tags(TagsDto tagDto)
 		{
-			Id = t.Id;
-			NewsId = t.NewsId;
-			Tag = t.Tag;
+			this.Id = tagDto.Id;
+			this.NewsId = tagDto.NewsId;
+			this.Tag = tagDto.Tag;
 		}
 
 		public int Id { get; set; }

@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
+using System.ComponentModel.DataAnnotations;
 namespace NewsSiteBackEnd.Controllers
 {
 	[Authorize]
@@ -84,7 +85,6 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("tell number already taken");
 			}
-
 			byte[] passwordHash, passwordSalt;
 			CreatePasswordHash(userDto.Password, out passwordHash, out passwordSalt);
 
