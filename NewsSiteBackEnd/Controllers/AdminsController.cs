@@ -4,8 +4,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -95,12 +93,7 @@ namespace NewsSiteBackEnd.Controllers
 
 			var token = tokenHandler.CreateToken(tokenDescriptor);
 			var tokenString = tokenHandler.WriteToken(token);
-			AdminsDto adminTokenHolder = new AdminsDto();
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<Admins, AdminsDto>());
-			var mapper = config.CreateMapper();
-			mapper.Map(admin, adminTokenHolder);
-			adminTokenHolder.Password = null;
-			
+			AdminsDto adminTokenHolder = new AdminsDto(admin);
 			adminTokenHolder.Token = tokenString;
 
 			return Ok(adminTokenHolder);
@@ -117,10 +110,8 @@ namespace NewsSiteBackEnd.Controllers
 
 			byte[] passwordHash, passwordSalt;
 			CreatePasswordHash(adminDto.Password, out passwordHash, out passwordSalt);
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<AdminsDto, Admins>());
-			var mapper = config.CreateMapper();
-			Admins admin = new Admins();
-			mapper.Map(adminDto, admin);
+			Admins admin = new Admins(adminDto);
+
 			admin.Password = passwordHash;
 			admin.Salt = passwordSalt;
 

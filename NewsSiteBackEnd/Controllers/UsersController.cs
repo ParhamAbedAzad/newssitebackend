@@ -9,9 +9,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using AutoMapper;
-using System.Net.Http.Headers;
-using System.IO;
 
 namespace NewsSiteBackEnd.Controllers
 {
@@ -83,17 +80,16 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("Email Address already taken");
 			}
-			if (dbContext.Users.Any(x => x.TelNumber == userDto.TelNumber))
+			if (dbContext.Users.Any(x => x.TelNumber == userDto.TelNumber) && userDto.TelNumber != null)
 			{
 				return BadRequest("tell number already taken");
 			}
 
 			byte[] passwordHash, passwordSalt;
 			CreatePasswordHash(userDto.Password, out passwordHash, out passwordSalt);
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<UsersDto, Users>());
-			var mapper = config.CreateMapper();
-			Users user = new Users();
-			mapper.Map(userDto, user);
+
+			Users user = new Users(userDto);
+
 			user.Password = passwordHash;
 			user.Salt = passwordSalt;
 
@@ -101,6 +97,20 @@ namespace NewsSiteBackEnd.Controllers
 			dbContext.SaveChanges();
 			return Ok("user: " + user.Username + " successfully created");
 
+		}
+		[AllowAnonymous]
+		[HttpPost("subscribe")]
+		public IActionResult subNewsFeed([FromBody]UsersDto userDto)
+		{
+			if(userDto.Email == null)
+			{
+				return BadRequest("empty Email address");
+			}
+			Users user = new Users(userDto);
+			user.Username = "subscriber";
+			dbContext.Users.Add(user);
+			dbContext.SaveChanges();
+			return Ok();
 		}
 
 		[Authorize(Roles = "admin")]
@@ -146,10 +156,7 @@ namespace NewsSiteBackEnd.Controllers
 		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpPut("{id}")]
 		public IActionResult UpdateUser(int id, [FromBody]UsersDto userDto) {
-			var config = new MapperConfiguration(cfg => cfg.CreateMap<UsersDto, Users>());
-			var mapper = config.CreateMapper();
-			Users newUser = new Users();
-			mapper.Map(userDto, newUser);
+			Users newUser = new Users(userDto);
 			var dbExistingUser = dbContext.Users.Find(id);
 			if(dbExistingUser == null)
 			{

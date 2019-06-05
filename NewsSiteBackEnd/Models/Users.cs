@@ -9,6 +9,17 @@ namespace NewsSiteBackEnd.Models
         {
             Comments = new HashSet<Comments>();
         }
+		public Users(UsersDto u)
+		{
+			this.Id = u.Id;
+			this.Username = u.Username;
+			this.Description = u.Description;
+			this.PhotoUrl = u.PhotoUrl;
+			this.FirstName = u.FirstName;
+			this.LastName = u.LastName;
+			this.TelNumber = u.TelNumber;
+			this.Email = u.Email;
+		}
 
         public int Id { get; set; }
         public string Username { get; set; }
