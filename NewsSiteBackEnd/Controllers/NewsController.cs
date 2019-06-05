@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsSiteBackEnd.Models;
-
+using MailKit.Net.Smtp;
+using MailKit;
+using MimeKit;
 namespace NewsSiteBackEnd.Controllers
 {
 	[Route("News")]
@@ -97,13 +99,55 @@ namespace NewsSiteBackEnd.Controllers
 			{
 				return BadRequest("could not resolve admin");
 			}
-
+			
 			news.DateAdded = DateTime.Now;
 			dbContext.News.Add(news);
 			dbContext.SaveChanges();
+			//send mail
+			var message = new MimeMessage();
+			message.From.Add(new MailboxAddress("KhajeNasirNewsSite", "knn.isjustice@gmail.com"));
+			message.To.AddRange(from e in dbContext.Users /*where e.Id == 2018 */select new MailboxAddress(e.Username ,e.Email));
+			message.Subject = news.Title;
+			message.Body = new TextPart("plain")
+			{
+				Text = news.Text
+				
+			};
+
+			using (var client = new SmtpClient())
+			{
+				client.Connect("smtp.gmail.com", 587, false);
+				client.Authenticate("knn.isjustice@gmail.com", "13771346");
+				client.Send(message);
+				client.Disconnect(true);
+			}
+
+
 			return Ok();
 		}
+		[AllowAnonymous]
+		[HttpGet("testmail")]
+		public IActionResult testEmail()
+		{
 
+			var message = new MimeMessage();
+			message.From.Add(new MailboxAddress("KhajeNasirNewsSite", "knn.isjustice@gmail.com"));
+			message.To.Add(new MailboxAddress("amirmohammad", "amirmohammad.abedini@gmail.com"));
+			message.Subject = "salam amir";
+			message.Body = new TextPart("plain")
+			{
+				Text = "chetori ziba ?"
+			};
+
+			using(var client = new SmtpClient())
+			{
+				client.Connect("smtp.gmail.com", 587, false);
+				client.Authenticate("knn.isjustice@gmail.com", "13771346");
+				client.Send(message);
+				client.Disconnect(true);
+			}
+			return Ok();
+		}
 		[Authorize(Roles = "admin,adminFullAccess")]
 		[HttpDelete("{id}")]
 		public IActionResult delNews([FromRoute(Name = "id")]int newsId)

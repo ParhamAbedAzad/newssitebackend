@@ -5,6 +5,10 @@ namespace NewsSiteBackEnd.Models
 {
 	public class CommentsDto
 	{
+		public CommentsDto()
+		{
+
+		}
 		public CommentsDto(Comments c)
 		{
 			Id = c.Id;

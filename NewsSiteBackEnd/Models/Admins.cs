@@ -10,7 +10,16 @@ namespace NewsSiteBackEnd.Models
             News = new HashSet<News>();
         }
 
-        public int Id { get; set; }
+		public Admins(AdminsDto a)
+		{
+			Id = a.Id;
+			Username = a.Username;
+			Email = a.Email;
+			Privilege = a.Privilege;
+			PhotoUrl = a.PhotoUrl;
+		}
+
+		public int Id { get; set; }
         public string Username { get; set; }
         public byte[] Password { get; set; }
         public string Email { get; set; }

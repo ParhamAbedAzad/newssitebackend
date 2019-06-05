@@ -7,6 +7,10 @@ namespace NewsSiteBackEnd.Models
 {
 	public class NewsDto
 	{
+		public NewsDto()
+		{
+
+		}
 		public NewsDto(News news)
 		{
 			Id = news.Id;

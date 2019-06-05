@@ -32,5 +32,21 @@ namespace NewsSiteBackEnd.Controllers
 			}
 			return BadRequest("no news with such id");
         }
+		[Authorize]
+		[HttpPost]
+		public IActionResult addTag([FromBody]TagsDto tagsDto)
+		{
+			if (this.User.IsInRole("admin") || this.User.IsInRole("adminFullAccess"))
+			{
+				if (dbContext.News.Find(tagsDto.NewsId) != null)
+				{
+					dbContext.Tags.Add(new Tags(tagsDto));
+					dbContext.SaveChanges();
+					return Ok();
+				}
+				return BadRequest("news not found");
+			}
+			return Unauthorized();
+		}
     }
 }
