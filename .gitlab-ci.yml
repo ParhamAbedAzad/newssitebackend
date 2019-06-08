@@ -1,0 +1,53 @@
+stages:
+    - build
+    - dockerize
+    - deploy
+
+build:
+    image: microsoft/dotnet:2.1-sdk
+    stage: build
+    only:
+        - master
+    before_script:
+        - cd NewsSiteBackEnd
+    script:
+        - dotnet restore
+        - dotnet build
+        - dotnet publish -o publish/
+    artifacts:
+        paths:
+            - NewsSiteBackEnd/publish/
+
+dockerize:
+    image: docker:stable
+    services:
+        - docker:dind
+    stage: dockerize
+    only:
+        - master
+    script:
+        - ls -a
+        - cp Dockerfile NewsSiteBackEnd/publish/
+        - cd NewsSiteBackEnd/publish
+        - docker login registry.gitlab.com -u $GITLAB_USER -p $GITLAB_PASS
+        - docker build -t registry.gitlab.com/three-stooges/newssitebackend .
+        - docker push registry.gitlab.com/three-stooges/newssitebackend
+    tags:
+        - docker
+        
+deploy:
+    image: debian
+    stage: deploy
+    only:
+        - master
+    before_script:
+        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+        - eval $(ssh-agent -s)
+        - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - ssh-keyscan 185.252.30.32 >> ~/.ssh/known_hosts
+        - chmod 644 ~/.ssh/known_hosts
+
+    script:
+        - ssh -v root@185.252.30.32 "./restart_news_backend.sh"
