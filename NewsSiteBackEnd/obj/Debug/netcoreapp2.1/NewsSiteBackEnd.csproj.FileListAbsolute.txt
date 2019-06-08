@@ -12,3 +12,17 @@ C:\Users\HP\source\repos\NewsSiteBackEnd\NewsSiteBackEnd\obj\Debug\netcoreapp2.1
 C:\Users\HP\source\repos\NewsSiteBackEnd\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.RazorTargetAssemblyInfo.cache
 C:\Users\HP\source\repos\NewsSiteBackEnd\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.dll
 C:\Users\HP\source\repos\NewsSiteBackEnd\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.pdb
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\bin\Debug\netcoreapp2.1\NewsSiteBackEnd.deps.json
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\bin\Debug\netcoreapp2.1\NewsSiteBackEnd.runtimeconfig.json
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\bin\Debug\netcoreapp2.1\NewsSiteBackEnd.runtimeconfig.dev.json
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\bin\Debug\netcoreapp2.1\NewsSiteBackEnd.dll
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\bin\Debug\netcoreapp2.1\NewsSiteBackEnd.pdb
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.csprojAssemblyReference.cache
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.RazorAssemblyInfo.cache
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.RazorAssemblyInfo.cs
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.AssemblyInfoInputs.cache
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.AssemblyInfo.cs
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.RazorTargetAssemblyInfo.cache
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.dll
+C:\Users\Asus\Source\Repos\newssitebackend\NewsSiteBackEnd\obj\Debug\netcoreapp2.1\NewsSiteBackEnd.pdb
