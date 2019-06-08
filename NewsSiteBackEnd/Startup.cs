@@ -58,7 +58,7 @@ namespace NewsSiteBackEnd
 			*/
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-			services.AddDbContext<NEWS_SITEContext>(options => options.UseSqlServer("Server=DESKTOP-S3C03RK\\AMIR;Database=NEWS_SITE;Trusted_Connection=True;"));
+			services.AddDbContext<NEWS_SITEContext>(options => options.UseSqlServer("Server=185.252.30.32;Database=NEWS_SITE;Persist Security Info=True;User ID=izad;Password=Izadizadi1742"));
 			/*services.AddMvc().AddJsonOptions(options => {
 				//options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 				options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;

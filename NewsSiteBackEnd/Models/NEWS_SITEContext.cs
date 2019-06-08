@@ -28,7 +28,7 @@ namespace NewsSiteBackEnd.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-S3C03RK\\AMIR;Database=NEWS_SITE;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=185.252.30.32;Database=NEWS_SITE;Persist Security Info=True;User ID=izad;Password=Izadizadi1742");
             }
         }
 
