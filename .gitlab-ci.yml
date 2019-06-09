@@ -14,6 +14,7 @@ build:
         - dotnet restore
         - dotnet build
         - dotnet publish -o publish/
+        - cp -r Resources/ publish/
     artifacts:
         paths:
             - NewsSiteBackEnd/publish/
