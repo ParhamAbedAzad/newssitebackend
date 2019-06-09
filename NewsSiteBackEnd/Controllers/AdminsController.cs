@@ -120,6 +120,19 @@ namespace NewsSiteBackEnd.Controllers
 			return Ok("admin: " + admin.Username + " successfully created");
 
 		}
+		[AllowAnonymous]
+		[HttpGet("isAuthorized")]
+		public IActionResult isAdminAuthrized()
+		{
+			if(this.User.IsInRole("adminFullAccess") || this.User.IsInRole("admin"))
+			{
+				return Ok("authorized");
+			}
+			return Unauthorized();
+
+		}
+
+
 		[Authorize(Roles = "adminFullAccess")]
 		[HttpDelete("{id}")]
 		public IActionResult deleteAdmin([FromRoute(Name ="id")]int id)
