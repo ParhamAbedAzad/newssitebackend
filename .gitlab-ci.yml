@@ -4,7 +4,7 @@ stages:
     - deploy
 
 build:
-    image: microsoft/dotnet:2.1-sdk
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1
     stage: build
     only:
         - master
